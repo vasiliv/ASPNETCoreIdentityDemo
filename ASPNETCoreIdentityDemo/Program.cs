@@ -20,6 +20,14 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 var connectionString = builder.Configuration.GetConnectionString("SQLServerIdentityConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+// Configure the Application Cookie settings
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // If the LoginPath isn't set, ASP.NET Core defaults the path to /Account/Login.
+    options.LoginPath = "/Account/Login"; // Set your login path here
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

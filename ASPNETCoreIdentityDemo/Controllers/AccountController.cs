@@ -54,21 +54,33 @@ namespace ASPNETCoreIdentityDemo.Controllers
             return View(model);
         }
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? ReturnUrl = null)
         {
+            ViewData["ReturnUrl"] = ReturnUrl;
             return View();
         }
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string? ReturnUrl)
         {
             if (ModelState.IsValid)
             {
                 var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
                 if (result.Succeeded)
                 {
                     // Handle successful login
-                    return RedirectToAction(nameof(HomeController.Index), "Home");
+
+                    // Check if the ReturnUrl is not null and is a local URL
+                    if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+                    {
+                        return Redirect(ReturnUrl);
+                    }
+                    else
+                    {
+                        // Redirect to default page
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -85,6 +97,7 @@ namespace ASPNETCoreIdentityDemo.Controllers
                     return View(model);
                 }
             }
+
             // If we got this far, something failed, redisplay form
             return View(model);
         }
